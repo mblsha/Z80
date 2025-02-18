@@ -79,6 +79,8 @@ class IOPort(Enum):
 
 def get_port_num_addr(port_num: int, direction: IOPortDirection):
     global PORT_FUNC_START
+    return PORT_FUNC_START + port_num
+
     if direction == IOPortDirection.OUTPUT:
         return PORT_FUNC_START + port_num
 
@@ -87,6 +89,8 @@ def get_port_num_addr(port_num: int, direction: IOPortDirection):
 
 # port + offset within the port
 def addr_to_port(addr: int) -> Tuple[Optional[IOPort], Optional[int]]:
+    return None, None
+
     if addr < PORT_FUNC_START + 0x100:
         return None, None
 
@@ -154,7 +158,8 @@ class Z80PCG850Arch(Z80):
                 )
 
             size = Z80IL.REG_TO_SIZE[oper_val]
-            il.append(il.set_reg(size, reg2str(oper_val), il.call(addr)))
+            # il.append(il.set_reg(size, reg2str(oper_val), il.call(addr)))
+            il.append(il.set_reg(size, reg2str(oper_val), il.load(1, addr)))
             return decoded.len
 
         Z80IL.gen_instr_il(addr, decoded, il)
@@ -260,10 +265,10 @@ class SharpPCG850View(BinaryView):
             self.define_user_symbol(Symbol(SymbolType.DataSymbol, addr, name))
             self.define_user_data_var(addr, t)
 
-            addr = get_port_num_addr(port.value, IOPortDirection.INPUT)
-            name = f"{port.name}_IN"
-            self.define_user_symbol(Symbol(SymbolType.FunctionSymbol, addr, name))
-            self.add_function(addr)
+            # addr = get_port_num_addr(port.value, IOPortDirection.INPUT)
+            # name = f"{port.name}_IN"
+            # self.define_user_symbol(Symbol(SymbolType.FunctionSymbol, addr, name))
+            # self.add_function(addr)
 
         # # entrypoint is that start_game header member
         # self.add_entry_point(unpack("<H", self.data[0xA : 0xA + 2])[0])
