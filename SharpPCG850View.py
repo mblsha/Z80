@@ -249,8 +249,8 @@ class SharpPCG850View(BinaryView):
                 "IO Ports",
                 PORT_FUNC_START,
                 0x1000,
-                SegmentFlag.SegmentReadable | SegmentFlag.SegmentExecutable,
-                SectionSemantics.ReadOnlyCodeSectionSemantics,
+                SegmentFlag.SegmentReadable | SegmentFlag.SegmentWritable,
+                SectionSemantics.ReadWriteDataSectionSemantics,
             )
         )
 
