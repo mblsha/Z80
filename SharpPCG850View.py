@@ -194,11 +194,15 @@ class SharpPCG850View(BinaryView):
     def __init__(self, data):
         # data is a binaryninja.binaryview.BinaryView
         BinaryView.__init__(self, parent_view=data, file_metadata=data.file)
+        self.repro_crash_on_save = True
         self.data = data
 
     def init(self):
-        self.arch = Architecture[Z80PCG850Arch.name]
-        self.platform = Architecture[Z80PCG850Arch.name].standalone_platform
+        arch_name = Z80PCG850Arch.name
+        if self.repro_crash_on_save:
+            arch_name = "Z80"
+        self.arch = Architecture[arch_name]
+        self.platform = Architecture[arch_name].standalone_platform
 
         END_ADDR = self.parent_view.end
 
@@ -229,6 +233,8 @@ class SharpPCG850View(BinaryView):
         # count loop while BANK0_ADDR + bank_index*BANK_SIZE < END_ADDR
         for bank_index in range(0, 99):
             addr = self.BANK0_ADDR + bank_index * self.BANK_SIZE
+            if self.repro_crash_on_save and bank_index > 0:
+                break
             addr_end = addr + self.BANK_SIZE
             if addr >= END_ADDR or addr_end >= END_ADDR:
                 break
@@ -259,16 +265,13 @@ class SharpPCG850View(BinaryView):
             self.add_user_section(s.name, s.start, s.size, s.semantics)
 
         for port in sorted(IOPort, key=lambda x: x.value):
+            if self.repro_crash_on_save:
+                break
             t = self.parse_type_string(f"uint8_t {port.name}")[0]
             addr = get_port_num_addr(port.value, IOPortDirection.OUTPUT)
             name = port.name
             self.define_user_symbol(Symbol(SymbolType.DataSymbol, addr, name))
             self.define_user_data_var(addr, t)
-
-            # addr = get_port_num_addr(port.value, IOPortDirection.INPUT)
-            # name = f"{port.name}_IN"
-            # self.define_user_symbol(Symbol(SymbolType.FunctionSymbol, addr, name))
-            # self.add_function(addr)
 
         # # entrypoint is that start_game header member
         # self.add_entry_point(unpack("<H", self.data[0xA : 0xA + 2])[0])
