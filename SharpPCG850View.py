@@ -87,80 +87,100 @@ def get_port_num_addr(port_num: int, direction: IOPortDirection):
     return PORT_FUNC_START + 0x100 + port_num * 4
 
 
-# port + offset within the port
-def addr_to_port(addr: int) -> Tuple[Optional[IOPort], Optional[int]]:
-    return None, None
+# if instruction_addr >= BANK_ADDR_START then try to determine bank number
+def bank_number_for_address(instruction_addr):
+    if instruction_addr < SharpPCG850View.BANK_ADDR_START:
+        if instruction_addr >= SharpPCG850View.ROM_ADDR_START:
+            return 0
+        return None
 
-    if addr < PORT_FUNC_START + 0x100:
-        return None, None
+    return (
+        1
+        + (instruction_addr - SharpPCG850View.BANK_ADDR_START)
+        // SharpPCG850View.BANK_SIZE
+    )
 
-    addr -= PORT_FUNC_START + 0x100
-    port_num = addr // 4
-    port_offset = addr % 4
 
-    try:
-        return IOPort(port_num), port_offset
-    except:
-        return None, None
+def _extend_address(instruction_addr, addr):
+    bank = bank_number_for_address(instruction_addr)
+    if bank is None or bank == 0:
+        return addr
+    return addr + SharpPCG850View.BANK_SIZE * (bank - 1)
+
+
+# addr is the address of the instruction
+def extend_address(addr, val, il):
+    bank = bank_number_for_address(addr)
+    if bank is None or bank == 0:
+        return il.const_pointer(2, val)
+
+    return il.const_pointer(4, _extend_address(addr, val))
+
+
+# use our function
+Z80IL.extend_address_func = extend_address
 
 
 class Z80PCG850Arch(Z80):
     name = "Z80 PC-G850"
 
-    intrinsics = {
+    intrinsics = Z80.intrinsics | {
         port.name: IntrinsicInfo(inputs=[], outputs=[Type.int(1)]) for port in IOPort
     }
 
-    def get_instruction_low_level_il(self, data, addr, il):
-        port, port_offset = addr_to_port(addr)
-        if port is not None:
-            if port_offset == 0:
-                il.append(il.set_reg(1, "A", il.intrinsic([], port.name, [])))
-                il.append(il.ret(il.pop(2)))
-                return 1
+    # map port reads/writes to a global memory address in order to be able
+    # to get cross-references, and have a clearly visible name
+    def out_llil(self, _addr, decoded, il):
+        (oper_type, oper_val) = (
+            decoded.operands[0] if decoded.operands else (None, None)
+        )
+        (operb_type, operb_val) = (
+            decoded.operands[1] if decoded.operands[1:] else (None, None)
+        )
 
+        if oper_type == OPER_TYPE.REG_DEREF:
+            # FIXME: not supported yet?
+            addr = Z80IL.operand_to_il(_addr, oper_type, oper_val, il)
+            print(f"OUT: reg deref addr: {hex(addr)}")
+        else:
+            addr = il.const_pointer(
+                4, get_port_num_addr(oper_val, IOPortDirection.OUTPUT)
+            )
+        reg = Z80IL.operand_to_il(_addr, operb_type, operb_val, il)
+        il.append(il.store(1, addr, reg))
+        return decoded.len
+
+    def in_llil(self, _addr, decoded, il):
+        (oper_type, oper_val) = (
+            decoded.operands[0] if decoded.operands else (None, None)
+        )
+        (operb_type, operb_val) = (
+            decoded.operands[1] if decoded.operands[1:] else (None, None)
+        )
+
+        if operb_type == OPER_TYPE.REG_DEREF:
+            # FIXME: not supported yet?
+            addr = Z80IL.operand_to_il(_addr, operb_type, operb_val, il)
+            print(f"IN: reg deref addr: {hex(addr)}")
+        else:
+            addr = il.const_pointer(
+                4, get_port_num_addr(operb_val, IOPortDirection.INPUT)
+            )
+
+        size = Z80IL.REG_TO_SIZE[oper_val]
+        # il.append(il.set_reg(size, reg2str(oper_val), il.call(addr)))
+        il.append(il.set_reg(size, reg2str(oper_val), il.load(1, addr)))
+        return decoded.len
+
+    def get_instruction_low_level_il(self, data, addr, il):
         decoded = decode(data, addr)
         if decoded.status != DECODE_STATUS.OK or decoded.len == 0:
             return None
 
         if decoded.op == OP.OUT:
-            (oper_type, oper_val) = (
-                decoded.operands[0] if decoded.operands else (None, None)
-            )
-            (operb_type, operb_val) = (
-                decoded.operands[1] if decoded.operands[1:] else (None, None)
-            )
-
-            if oper_type == OPER_TYPE.REG_DEREF:
-                addr = Z80IL.operand_to_il(oper_type, oper_val, il)
-                print(f"OUT: reg deref addr: {hex(addr)}")
-            else:
-                addr = il.const_pointer(
-                    4, get_port_num_addr(oper_val, IOPortDirection.OUTPUT)
-                )
-            reg = Z80IL.operand_to_il(operb_type, operb_val, il)
-            il.append(il.store(1, addr, reg))
-            return decoded.len
+            return self.out_llil(addr, decoded, il)
         elif decoded.op == OP.IN:
-            (oper_type, oper_val) = (
-                decoded.operands[0] if decoded.operands else (None, None)
-            )
-            (operb_type, operb_val) = (
-                decoded.operands[1] if decoded.operands[1:] else (None, None)
-            )
-
-            if operb_type == OPER_TYPE.REG_DEREF:
-                addr = Z80IL.operand_to_il(operb_type, operb_val, il)
-                print(f"IN: reg deref addr: {hex(addr)}")
-            else:
-                addr = il.const_pointer(
-                    4, get_port_num_addr(operb_val, IOPortDirection.INPUT)
-                )
-
-            size = Z80IL.REG_TO_SIZE[oper_val]
-            # il.append(il.set_reg(size, reg2str(oper_val), il.call(addr)))
-            il.append(il.set_reg(size, reg2str(oper_val), il.load(1, addr)))
-            return decoded.len
+            return self.in_llil(addr, decoded, il)
 
         Z80IL.gen_instr_il(addr, decoded, il)
 
@@ -181,7 +201,10 @@ class SharpPCG850View(BinaryView):
     long_name = "Sharp PC-G850 ROM"
 
     BANK0_ADDR = 0x8000
+    ROM_ADDR_START = BANK0_ADDR
+    BANK_ADDR_START = 0xC000  # bank 1
     BANK_SIZE = 0x4000
+    START_ADDR = 0xC000
 
     @classmethod
     def is_valid_for_data(self, data):
@@ -194,7 +217,7 @@ class SharpPCG850View(BinaryView):
     def __init__(self, data):
         # data is a binaryninja.binaryview.BinaryView
         BinaryView.__init__(self, parent_view=data, file_metadata=data.file)
-        self.repro_crash_on_save = True
+        self.repro_crash_on_save = False
         self.data = data
 
     def init(self):
@@ -273,8 +296,7 @@ class SharpPCG850View(BinaryView):
             self.define_user_symbol(Symbol(SymbolType.DataSymbol, addr, name))
             self.define_user_data_var(addr, t)
 
-        # # entrypoint is that start_game header member
-        # self.add_entry_point(unpack("<H", self.data[0xA : 0xA + 2])[0])
+        self.add_entry_point(self.START_ADDR)
         return True
 
     def perform_get_address_size(self) -> int:
@@ -287,4 +309,4 @@ class SharpPCG850View(BinaryView):
         return True
 
     def perform_get_entry_point(self):
-        return 0
+        return self.START_ADDR
