@@ -102,6 +102,8 @@ def bank_number_for_address(instruction_addr):
 
 
 def _extend_address(instruction_addr, addr):
+    if addr < SharpPCG850View.BANK_ADDR_START:
+        return addr
     bank = bank_number_for_address(instruction_addr)
     if bank is None or bank == 0:
         return addr
