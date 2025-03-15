@@ -21,6 +21,7 @@ binaryninja.BinaryViewType['ELF'].register_arch(EM_Z80, binaryninja.enums.Endian
 
 class ParametersInRegistersCallingConvention(binaryninja.CallingConvention):
     name = "ParametersInRegisters"
+    # int_return_reg = 'A'
 
 
 arch = binaryninja.Architecture["Z80"]

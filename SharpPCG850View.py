@@ -287,16 +287,13 @@ class SharpPCG850View(BinaryView):
 
         for s in segments:
             self.add_auto_segment(s.start, s.size, s.start, s.size, s.flags)
-            self.add_user_section(s.name, s.start, s.size, s.semantics)
+            self.add_auto_section(s.name, s.start, s.size, s.semantics)
 
         for port in sorted(IOPort, key=lambda x: x.value):
             if self.repro_crash_on_save:
                 break
-            t = self.parse_type_string(f"uint8_t {port.name}")[0]
             addr = get_port_num_addr(port.value, IOPortDirection.OUTPUT)
-            name = port.name
-            self.define_user_symbol(Symbol(SymbolType.DataSymbol, addr, name))
-            self.define_user_data_var(addr, t)
+            self.define_data_var(addr, f"uint8_t", port.name)
 
         self.add_entry_point(self.START_ADDR)
         return True
