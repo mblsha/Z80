@@ -1,3 +1,16 @@
+import os
+import sys
+from pathlib import Path
+
+# Add plugin directory to path for imports
+plugin_dir = str(Path(__file__).resolve().parent)
+if plugin_dir not in sys.path:
+    sys.path.insert(0, plugin_dir)
+
+# Load mock API for testing if requested
+if os.environ.get("FORCE_BINJA_MOCK") == "1":
+    from binja_test_mocks import binja_api  # noqa: F401
+
 import binaryninja
 
 from .Z80Arch import Z80
