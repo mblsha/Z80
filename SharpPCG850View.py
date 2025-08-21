@@ -5,9 +5,10 @@ from enum import Enum
 from struct import unpack
 from typing import Any, Dict, List, Optional, Tuple
 
-from binaryninja.architecture import Architecture, IntrinsicInfo
+from binaryninja.architecture import Architecture
 from binaryninja.binaryview import BinaryView
 from binaryninja.enums import Endianness, SectionSemantics, SegmentFlag, SymbolType
+from binaryninja.function import IntrinsicInfo
 from binaryninja.types import Symbol, Type
 from z80dis.z80 import *
 

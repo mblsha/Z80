@@ -5,10 +5,29 @@ requires-python = ">=3.10"
 [[package]]
 name = "binja-test-mocks"
 version = "0.1.2"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/14/77/9612c55cdc2d58b190b62c2340a0465797ea80123849e1e9bce8c88bf049/binja_test_mocks-0.1.2.tar.gz", hash = "sha256:c61624e53ad91ab8b3cf9a0a2f3b29c64a43c2a79885d34a0995422126eeb382", size = 21840 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/db/47/69e658d8a9563a6ebe24606986413ebb1b8a7f27bdaedc34014e07979dab/binja_test_mocks-0.1.2-py3-none-any.whl", hash = "sha256:82849ecc1f7530fa3c3c447c184250b50a31fc31579e28fefe37b1e078946d4e", size = 26110 },
+source = { directory = "vendor/binja-test-mocks" }
+
+[package.metadata]
+requires-dist = [
+    { name = "build", marker = "extra == 'dev'", specifier = ">=0.10" },
+    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.0" },
+    { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0" },
+    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.1" },
+    { name = "twine", marker = "extra == 'dev'", specifier = ">=4.0" },
+]
+provides-extras = ["dev"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "build", specifier = ">=0.10" },
+    { name = "mypy", specifier = ">=1.0" },
+    { name = "pyright", specifier = ">=1.1" },
+    { name = "pytest", specifier = ">=7.0" },
+    { name = "pytest-cov", specifier = ">=4.0" },
+    { name = "ruff", specifier = ">=0.1" },
+    { name = "twine", specifier = ">=4.0" },
 ]
 
 [[package]]
@@ -34,7 +53,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "binja-test-mocks", specifier = ">=0.1.2" },
+    { name = "binja-test-mocks", directory = "vendor/binja-test-mocks" },
     { name = "z80dis", specifier = ">=1.0.4" },
 ]
 

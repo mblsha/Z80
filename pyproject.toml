@@ -29,7 +29,7 @@ classifiers = [
 
 dependencies = [
     "z80dis>=1.0.4",
-    "binja-test-mocks>=0.1.2",
+    "binja-test-mocks @ file:///Users/mblsha/Library/Application%20Support/Binary%20Ninja/plugins/Z80/vendor/binja-test-mocks",
 ]
 
 # Dev dependencies are now in [tool.uv] section
@@ -38,6 +38,9 @@ dependencies = [
 "Homepage" = "https://github.com/yourusername/binja-z80"
 "Bug Tracker" = "https://github.com/yourusername/binja-z80/issues"
 "Documentation" = "https://github.com/yourusername/binja-z80/blob/main/README.md"
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
