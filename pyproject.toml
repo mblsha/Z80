@@ -29,7 +29,7 @@ classifiers = [
 
 dependencies = [
     "z80dis>=1.0.4",
-    "binja-test-mocks @ git+ssh://git@github.com/mblsha/binja-test-mocks.git@main",
+    "binja-test-mocks @ git+https://github.com/mblsha/binja-test-mocks.git@main",
 ]
 
 # Dev dependencies are now in [tool.uv] section
