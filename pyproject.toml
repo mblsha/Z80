@@ -29,7 +29,7 @@ classifiers = [
 
 dependencies = [
     "z80dis>=1.0.4",
-    "binja-test-mocks @ git+https://github.com/mblsha/binja-test-mocks.git@main",
+    "binja-test-mocks>=0.1.2",
 ]
 
 # Dev dependencies are now in [tool.uv] section
@@ -38,9 +38,6 @@ dependencies = [
 "Homepage" = "https://github.com/yourusername/binja-z80"
 "Bug Tracker" = "https://github.com/yourusername/binja-z80/issues"
 "Documentation" = "https://github.com/yourusername/binja-z80/blob/main/README.md"
-
-[tool.hatch.metadata]
-allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
