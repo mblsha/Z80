@@ -1,33 +1,35 @@
 #!/usr/bin/env fish
-# Run tests for Z80 Binary Ninja plugin
+# Run tests for Z80 Binary Ninja plugin using uv
 
 set -x FORCE_BINJA_MOCK 1
 
-# Check if we're in a virtual environment
-if not set -q VIRTUAL_ENV
-    echo "⚠️  No virtual environment active. Creating one..."
-    python3 -m venv venv
-    source venv/bin/activate.fish
-    echo "📦 Installing dependencies..."
-    pip install -e .
-    pip install -e /Users/mblsha/Library/Application\ Support/Binary\ Ninja/plugins/binja-test-mocks
-    pip install pytest pytest-cov
+echo "🧪 Running Z80 plugin tests with uv..."
+
+# Check if uv is installed
+if not command -v uv > /dev/null
+    echo "❌ uv is not installed. Please install it first:"
+    echo "   curl -LsSf https://astral.sh/uv/install.sh | sh"
+    exit 1
 end
 
-echo "🧪 Running Z80 plugin tests..."
-pytest -v --cov=. --cov-report=term-missing
+# Sync dependencies (uv handles venv automatically)
+echo "📦 Syncing dependencies..."
+uv sync --dev
+
+# Run tests with coverage
+echo "🧪 Running tests..."
+uv run pytest -v --cov=. --cov-report=term-missing
 
 # Run type checking if available
-if command -v pyright > /dev/null
-    echo "🔍 Running type checking with pyright..."
-    pyright
-else if command -v mypy > /dev/null
-    echo "🔍 Running type checking with mypy..."
-    mypy .
+echo "🔍 Running type checking with pyright..."
+uv run pyright; or begin
+    echo "⚠️  pyright not available, trying mypy..."
+    uv run mypy .
 end
 
-# Run linting if available
-if command -v ruff > /dev/null
-    echo "🔍 Running linting with ruff..."
-    ruff check .
-end
+# Run linting
+echo "🔍 Running linting with ruff..."
+uv run ruff check .
+uv run ruff format --check .
+
+echo "✅ All tests completed!"

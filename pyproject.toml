@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "binja-z80"
@@ -29,32 +29,21 @@ classifiers = [
 
 dependencies = [
     "z80dis>=1.0.4",
-    "binja-test-mocks>=0.1.0",
+    "binja-test-mocks @ git+ssh://git@github.com/mblsha/binja-test-mocks.git@main",
 ]
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.4.0",
-    "pytest-cov>=4.1.0",
-    "pytest-timeout>=2.1.0",
-    "pytest-xdist>=3.3.1",  # for parallel test execution
-    "mypy>=1.5.0",
-    "ruff>=0.1.0",
-    "black>=23.7.0",
-    "isort>=5.12.0",
-]
+# Dev dependencies are now in [tool.uv] section
 
 [project.urls]
 "Homepage" = "https://github.com/yourusername/binja-z80"
 "Bug Tracker" = "https://github.com/yourusername/binja-z80/issues"
 "Documentation" = "https://github.com/yourusername/binja-z80/blob/main/README.md"
 
-[tool.setuptools]
-packages = ["Z80", "tests"]
-include-package-data = true
+[tool.hatch.metadata]
+allow-direct-references = true
 
-[tool.setuptools.package-data]
-"Z80" = ["*.txt", "*.json"]
+[tool.hatch.build.targets.wheel]
+packages = ["."]
 
 [tool.coverage.run]
 source = ["."]
@@ -120,6 +109,18 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = "binaryninja.*"
 ignore_missing_imports = false
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-timeout>=2.1.0",
+    "pytest-xdist>=3.3.1",
+    "mypy>=1.5.0",
+    "ruff>=0.1.0",
+    "black>=23.7.0",
+    "isort>=5.12.0",
+]
 
 [tool.ruff]
 target-version = "py310"

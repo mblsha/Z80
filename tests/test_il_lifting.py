@@ -2,11 +2,12 @@
 """Test Z80 IL lifting functionality."""
 
 import os
+
 os.environ["FORCE_BINJA_MOCK"] = "1"
 
+from binaryninja import Architecture
 from binja_test_mocks import binja_api  # noqa: F401
 from binja_test_mocks.mock_llil import MockLowLevelILFunction
-from binaryninja import Architecture
 
 # Import after setting up mocks
 from ..Z80Arch import Z80

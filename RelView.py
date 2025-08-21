@@ -3,11 +3,12 @@
 import re
 from struct import pack
 
-from binaryninja.types import Symbol
-from binaryninja.binaryview import BinaryView
-from binaryninja.log import log_info, log_debug
 from binaryninja.architecture import Architecture
-from binaryninja.enums import SegmentFlag, SymbolType, SectionSemantics
+from binaryninja.binaryview import BinaryView
+from binaryninja.enums import SectionSemantics, SegmentFlag, SymbolType
+from binaryninja.log import log_debug, log_info
+from binaryninja.types import Symbol
+
 
 class RelView(BinaryView):
     name = '.rel object'

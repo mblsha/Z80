@@ -14,9 +14,11 @@ if os.environ.get("FORCE_BINJA_MOCK") == "1":
 import binaryninja
 
 from .Z80Arch import Z80
+
 Z80.register()
 
 from .ColecoView import ColecoView
+
 ColecoView.register()
 
 from .SharpPCG850View import SharpPCG850View, Z80PCG850Arch
@@ -26,6 +28,7 @@ SharpPCG850View.register()
 
 
 from .RelView import RelView
+
 RelView.register()
 
 # built-in view

@@ -8,25 +8,30 @@ This is a Binary Ninja Z80 architecture plugin that provides disassembly and IL 
 
 ## Common Development Commands
 
-### Testing with uv
+This project uses [uv](https://github.com/astral-sh/uv) for fast, reliable Python dependency management.
+
+### Setup
 
 ```bash
-# Install dependencies and run tests (automatically handles FORCE_BINJA_MOCK=1)
-uv sync --extra dev
-uv run pytest
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+# or on macOS: brew install uv
 
-# Run tests with coverage
+# Sync all dependencies (creates venv automatically)
+uv sync --dev
+```
+
+### Testing
+
+```bash
+# Run all tests with coverage (automatically sets FORCE_BINJA_MOCK=1)
 uv run pytest --cov
 
 # Run specific test files
 FORCE_BINJA_MOCK=1 uv run pytest tests/test_disasm.py
 FORCE_BINJA_MOCK=1 uv run pytest tests/test_il_lifting.py
-```
 
-### Testing with Fish Shell
-
-```bash
-# Run the comprehensive test suite
+# Run comprehensive test suite with Fish shell
 fish run-tests.fish
 ```
 
@@ -40,8 +45,6 @@ uv run mypy .
 # Linting and formatting
 uv run ruff check .
 uv run ruff format .
-uv run black .
-uv run isort .
 ```
 
 ## Architecture

@@ -5,11 +5,17 @@
 # gen_instr_il()
 
 # Binja includes
-from binaryninja.log import log_info
 from binaryninja.architecture import Architecture
-from binaryninja.enums import LowLevelILOperation, LowLevelILFlagCondition
-from binaryninja.function import RegisterInfo, InstructionInfo, InstructionTextToken
-from binaryninja.lowlevelil import LowLevelILLabel, ILRegister, ILFlag, LLIL_TEMP, LLIL_GET_TEMP_REG_INDEX
+from binaryninja.enums import LowLevelILFlagCondition, LowLevelILOperation
+from binaryninja.function import InstructionInfo, InstructionTextToken, RegisterInfo
+from binaryninja.log import log_info
+from binaryninja.lowlevelil import (
+    LLIL_GET_TEMP_REG_INDEX,
+    LLIL_TEMP,
+    ILFlag,
+    ILRegister,
+    LowLevelILLabel,
+)
 
 # decode/disassemble
 from z80dis.z80 import *

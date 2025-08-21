@@ -2,13 +2,14 @@
 """Test Z80 disassembly against expected output."""
 
 import os
+
 os.environ["FORCE_BINJA_MOCK"] = "1"
 
 import re
 from pathlib import Path
 
-from binja_test_mocks import binja_api  # noqa: F401
 from binaryninja import Architecture
+from binja_test_mocks import binja_api  # noqa: F401
 
 # Import after setting up mocks
 from ..Z80Arch import Z80

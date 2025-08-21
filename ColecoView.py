@@ -2,10 +2,11 @@
 
 from struct import unpack
 
-from binaryninja.binaryview import BinaryView
 from binaryninja.architecture import Architecture
-from binaryninja.types import Symbol
+from binaryninja.binaryview import BinaryView
 from binaryninja.enums import SegmentFlag, SymbolType
+from binaryninja.types import Symbol
+
 
 class ColecoView(BinaryView):
 	name = 'Coleco'

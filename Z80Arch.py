@@ -2,15 +2,19 @@
 
 import re
 
-from binaryninja.log import log_info
 from binaryninja.architecture import Architecture
-from binaryninja.function import RegisterInfo, InstructionInfo, InstructionTextToken, IntrinsicInfo
+from binaryninja.enums import (
+    BranchType,
+    FlagRole,
+    InstructionTextTokenType,
+    LowLevelILFlagCondition,
+)
+from binaryninja.function import InstructionInfo, InstructionTextToken, IntrinsicInfo, RegisterInfo
+from binaryninja.log import log_info
 from binaryninja.types import Type
-from binaryninja.enums import InstructionTextTokenType, BranchType, FlagRole, LowLevelILFlagCondition
+from z80dis.z80 import *
 
 from . import Z80IL
-
-from z80dis.z80 import *
 
 CC_TO_STR = {
     CC.ALWAYS:'1', CC.NOT_N:'nn', CC.N:'n', CC.NOT_Z:'nz', CC.Z:'z',

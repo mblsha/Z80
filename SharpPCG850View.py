@@ -1,20 +1,18 @@
 #!/usr/bin/env python
 
-from struct import unpack
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, List, Optional, Tuple, Dict
+from struct import unpack
+from typing import Any, Dict, List, Optional, Tuple
 
-from binaryninja.binaryview import BinaryView
 from binaryninja.architecture import Architecture, IntrinsicInfo
+from binaryninja.binaryview import BinaryView
+from binaryninja.enums import Endianness, SectionSemantics, SegmentFlag, SymbolType
 from binaryninja.types import Symbol, Type
-from binaryninja.enums import SegmentFlag, SymbolType
-from binaryninja.enums import SymbolType, SegmentFlag, SectionSemantics, Endianness
-
-from .Z80Arch import Z80
-from . import Z80IL
 from z80dis.z80 import *
 
+from . import Z80IL
+from .Z80Arch import Z80
 
 PORT_FUNC_START = None
 
