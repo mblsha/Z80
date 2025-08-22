@@ -122,6 +122,19 @@ dev-dependencies = [
 [tool.ruff]
 target-version = "py310"
 line-length = 100
+exclude = [
+    "disasm65536.txt",
+    "z80list.txt",
+    "venv",
+    ".venv",
+    "__pycache__",
+    ".git",
+    "build",
+    "dist",
+    "vendor",
+]
+
+[tool.ruff.lint]
 select = [
     "E",   # pycodestyle errors
     "W",   # pycodestyle warnings
@@ -136,21 +149,18 @@ ignore = [
     "E501",  # line too long (handled by black)
     "B008",  # do not perform function calls in argument defaults
     "C901",  # too complex
-]
-exclude = [
-    "disasm65536.txt",
-    "z80list.txt",
-    "venv",
-    ".venv",
-    "__pycache__",
-    ".git",
-    "build",
-    "dist",
+    "E402",  # module level import not at top of file (needed for mock)
+    "F405",  # may be undefined from star imports (common in z80dis)
+    "F403",  # unable to detect undefined names from star imports
+    "W191",  # indentation contains tabs (legacy code)
+    "E701",  # multiple statements on one line
 ]
 
-[tool.ruff.per-file-ignores]
-"tests/*" = ["B011"]  # allow assert False in tests
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B011", "F401"]  # allow assert False and unused imports in tests
 "__init__.py" = ["F401"]  # allow unused imports in __init__ files
+"ColecoView.py" = ["W191", "E701", "SIM102", "SIM103", "E713", "UP031"]  # legacy code with tabs
+"Z80IL.py" = ["F405", "F403"]  # star imports from z80dis
 
 [tool.black]
 target-version = ["py310", "py311", "py312"]

@@ -33,7 +33,10 @@ RelView.register()
 
 # built-in view
 EM_Z80 = 220
-binaryninja.BinaryViewType['ELF'].register_arch(EM_Z80, binaryninja.enums.Endianness.LittleEndian, binaryninja.Architecture['Z80'])
+binaryninja.BinaryViewType["ELF"].register_arch(
+    EM_Z80, binaryninja.enums.Endianness.LittleEndian, binaryninja.Architecture["Z80"]
+)
+
 
 class ParametersInRegistersCallingConvention(binaryninja.CallingConvention):
     name = "ParametersInRegisters"
@@ -41,12 +44,7 @@ class ParametersInRegistersCallingConvention(binaryninja.CallingConvention):
 
 
 arch = binaryninja.Architecture["Z80"]
-arch.register_calling_convention(
-    ParametersInRegistersCallingConvention(arch, "default")
-)
+arch.register_calling_convention(ParametersInRegistersCallingConvention(arch, "default"))
 
 arch = binaryninja.Architecture["Z80 PC-G850"]
-arch.register_calling_convention(
-    ParametersInRegistersCallingConvention(arch, "default")
-)
-
+arch.register_calling_convention(ParametersInRegistersCallingConvention(arch, "default"))

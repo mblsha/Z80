@@ -2,14 +2,12 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from struct import unpack
-from typing import Any, Dict, List, Optional, Tuple
 
 from binaryninja.architecture import Architecture
 from binaryninja.binaryview import BinaryView
-from binaryninja.enums import Endianness, SectionSemantics, SegmentFlag, SymbolType
+from binaryninja.enums import Endianness, SectionSemantics, SegmentFlag
 from binaryninja.function import IntrinsicInfo
-from binaryninja.types import Symbol, Type
+from binaryninja.types import Type
 from z80dis.z80 import *
 
 from . import Z80IL
@@ -67,9 +65,7 @@ class IOPort(Enum):
     UART_DATA = 0x6F
 
     SET_BOOTROM_OFF = 0x1A
-    RAM_CE_MODE = (
-        0x1B  # 0: CERAM1 (internal RAM), 1: CERAM2 (external RAM on system bus)
-    )
+    RAM_CE_MODE = 0x1B  # 0: CERAM1 (internal RAM), 1: CERAM2 (external RAM on system bus)
     SET_IORESET = 0x1C
 
     UNKNOWN_1D = 0x1D
@@ -93,11 +89,7 @@ def bank_number_for_address(instruction_addr):
             return 0
         return None
 
-    return (
-        1
-        + (instruction_addr - SharpPCG850View.BANK_ADDR_START)
-        // SharpPCG850View.BANK_SIZE
-    )
+    return 1 + (instruction_addr - SharpPCG850View.BANK_ADDR_START) // SharpPCG850View.BANK_SIZE
 
 
 def _extend_address(instruction_addr, addr):
@@ -132,41 +124,29 @@ class Z80PCG850Arch(Z80):
     # map port reads/writes to a global memory address in order to be able
     # to get cross-references, and have a clearly visible name
     def out_llil(self, _addr, decoded, il):
-        (oper_type, oper_val) = (
-            decoded.operands[0] if decoded.operands else (None, None)
-        )
-        (operb_type, operb_val) = (
-            decoded.operands[1] if decoded.operands[1:] else (None, None)
-        )
+        (oper_type, oper_val) = decoded.operands[0] if decoded.operands else (None, None)
+        (operb_type, operb_val) = decoded.operands[1] if decoded.operands[1:] else (None, None)
 
         if oper_type == OPER_TYPE.REG_DEREF:
             # FIXME: not supported yet?
             addr = Z80IL.operand_to_il(_addr, oper_type, oper_val, il)
             print(f"OUT: reg deref addr: {hex(addr)}")
         else:
-            addr = il.const_pointer(
-                4, get_port_num_addr(oper_val, IOPortDirection.OUTPUT)
-            )
+            addr = il.const_pointer(4, get_port_num_addr(oper_val, IOPortDirection.OUTPUT))
         reg = Z80IL.operand_to_il(_addr, operb_type, operb_val, il)
         il.append(il.store(1, addr, reg))
         return decoded.len
 
     def in_llil(self, _addr, decoded, il):
-        (oper_type, oper_val) = (
-            decoded.operands[0] if decoded.operands else (None, None)
-        )
-        (operb_type, operb_val) = (
-            decoded.operands[1] if decoded.operands[1:] else (None, None)
-        )
+        (oper_type, oper_val) = decoded.operands[0] if decoded.operands else (None, None)
+        (operb_type, operb_val) = decoded.operands[1] if decoded.operands[1:] else (None, None)
 
         if operb_type == OPER_TYPE.REG_DEREF:
             # FIXME: not supported yet?
             addr = Z80IL.operand_to_il(_addr, operb_type, operb_val, il)
             print(f"IN: reg deref addr: {hex(addr)}")
         else:
-            addr = il.const_pointer(
-                4, get_port_num_addr(operb_val, IOPortDirection.INPUT)
-            )
+            addr = il.const_pointer(4, get_port_num_addr(operb_val, IOPortDirection.INPUT))
 
         size = Z80IL.REG_TO_SIZE[oper_val]
         # il.append(il.set_reg(size, reg2str(oper_val), il.call(addr)))
@@ -212,7 +192,7 @@ class SharpPCG850View(BinaryView):
         buf = data.read(0, 4)
         if len(buf) < 4:
             return False
-        result = buf[:4] == b"\xC3\xF4\xBF\x00"
+        result = buf[:4] == b"\xc3\xf4\xbf\x00"
         return result
 
     def __init__(self, data):
@@ -292,7 +272,7 @@ class SharpPCG850View(BinaryView):
             if self.repro_crash_on_save:
                 break
             addr = get_port_num_addr(port.value, IOPortDirection.OUTPUT)
-            self.define_data_var(addr, f"uint8_t", port.name)
+            self.define_data_var(addr, "uint8_t", port.name)
 
         self.add_entry_point(self.START_ADDR)
         return True
