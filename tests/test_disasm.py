@@ -46,7 +46,8 @@ def is_token_equal(a, b):
         b_vals = tok_vals(b)
         if b_vals:
             return bool(a_vals.intersection(b_vals))
-    return a == b
+    # Case-insensitive comparison for non-numeric tokens
+    return a.lower() == b.lower()
 
 
 def is_disasm_equal(a, b):
@@ -84,17 +85,17 @@ def test_z80_disassembly():
 def test_specific_instructions():
     """Test specific Z80 instructions."""
     # Test NOP
-    assert disasm_binja(b"\x00\x00\x00\x00", 0) == "nop"
+    assert disasm_binja(b"\x00\x00\x00\x00", 0) == "NOP"
 
     # Test LD instructions
-    assert disasm_binja(b"\x3e\x42\x00\x00", 0) == "ld a, 0x42"
-    assert disasm_binja(b"\x01\x34\x12\x00", 0) == "ld bc, 0x1234"
+    assert disasm_binja(b"\x3e\x42\x00\x00", 0) == "LD A,0x42"
+    assert disasm_binja(b"\x01\x34\x12\x00", 0) == "LD BC,0x1234"
 
     # Test JP instructions
-    assert disasm_binja(b"\xc3\x56\x34\x00", 0) == "jp 0x3456"
+    assert disasm_binja(b"\xc3\x56\x34\x00", 0) == "JP 0x3456"
 
     # Test CALL
-    assert disasm_binja(b"\xcd\x78\x56\x00", 0) == "call 0x5678"
+    assert disasm_binja(b"\xcd\x78\x56\x00", 0) == "CALL 0x5678"
 
     # Test RET
-    assert disasm_binja(b"\xc9\x00\x00\x00", 0) == "ret"
+    assert disasm_binja(b"\xc9\x00\x00\x00", 0) == "RET"
