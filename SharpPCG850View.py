@@ -10,8 +10,14 @@ from binaryninja.function import IntrinsicInfo
 from binaryninja.types import Type
 from z80dis.z80 import *
 
-from . import Z80IL
-from .Z80Arch import Z80
+try:
+    from . import Z80IL  # Binary Ninja plugin context
+except ImportError:
+    import Z80IL  # Test context
+try:
+    from .Z80Arch import Z80  # Binary Ninja plugin context
+except ImportError:
+    from Z80Arch import Z80  # Test context
 
 PORT_FUNC_START = None
 

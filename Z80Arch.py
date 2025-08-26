@@ -12,7 +12,10 @@ from binaryninja.function import InstructionInfo, InstructionTextToken, Intrinsi
 from binaryninja.types import Type
 from z80dis.z80 import *
 
-from . import Z80IL
+try:
+    from . import Z80IL  # Binary Ninja plugin context
+except ImportError:
+    import Z80IL  # Test context
 
 CC_TO_STR = {
     CC.ALWAYS: "1",
