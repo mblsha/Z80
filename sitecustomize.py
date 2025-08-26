@@ -20,8 +20,8 @@ def _patch_binja_mocks():
         pass
 
     # Export them on the mock module so tests can import if desired
-    setattr(mock_api, "RegistrationError", RegistrationError)
-    setattr(mock_api, "NotRegisteredError", NotRegisteredError)
+    mock_api.RegistrationError = RegistrationError  # noqa: B010
+    mock_api.NotRegisteredError = NotRegisteredError  # noqa: B010
 
     # ---- Real registry (mutate the existing class object) ----
     if not hasattr(Arch, "_registry"):

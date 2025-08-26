@@ -24,7 +24,6 @@ from binja_test_mocks import binja_api  # noqa: F401
 def setup_plugin_registration():
     """Register the Z80 plugin for all tests."""
     # sitecustomize.py already patched the mocks, so registration is now meaningful.
-    
     # Clear any existing registrations for test isolation
     if hasattr(Architecture, "clear_registry"):
         Architecture.clear_registry()
