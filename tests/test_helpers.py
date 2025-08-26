@@ -6,14 +6,14 @@ from typing import Any
 def get_operations(il: Any) -> list[dict[str, Any]]:
     """
     Convert MockLowLevelILFunction.ils to operations format for tests.
-    
-    This function transforms the raw MockLLIL objects in il.ils into the 
+
+    This function transforms the raw MockLLIL objects in il.ils into the
     dictionary format expected by Z80 plugin tests, providing a clean
     interface that matches Binary Ninja's expected test patterns.
-    
+
     Args:
         il: MockLowLevelILFunction instance with ils attribute
-        
+
     Returns:
         List of dictionaries representing operations in test-expected format
     """
@@ -29,7 +29,7 @@ def get_operations(il: Any) -> list[dict[str, Any]]:
                 label = llil_op.label
                 if hasattr(label, "constant"):
                     op_dict["dest"] = {"value": label.constant}
-                elif isinstance(label, (int, float)):
+                elif isinstance(label, int | float):
                     op_dict["dest"] = {"value": label}
                 else:
                     # This is a placeholder - the current Z80 plugin implementation creates
@@ -38,12 +38,12 @@ def get_operations(il: Any) -> list[dict[str, Any]]:
                     op_dict["dest"] = str(label)
             result.append(op_dict)
             continue
-            
+
         # Extract operation name from the MockLLIL string representation
         if hasattr(llil_op, "op") and hasattr(llil_op, "ops"):
             # Convert operation enum to string, handling the format properly
             raw_op_name = str(llil_op.op).replace("LLIL_", "")
-            # Handle size suffixes like "SET_REG.b{0}" -> just "set_reg"  
+            # Handle size suffixes like "SET_REG.b{0}" -> just "set_reg"
             op_name = raw_op_name.split(".")[0].split("{")[0].lower()
             op_dict: dict[str, Any] = {"op": op_name}
 
@@ -56,7 +56,7 @@ def get_operations(il: Any) -> list[dict[str, Any]]:
                         op_dict["dest"] = llil_op.ops[0].name.lower()
                     else:
                         op_dict["dest"] = str(llil_op.ops[0]) if llil_op.ops[0] is not None else ""
-                    
+
                     # Handle source operand
                     src_operand = llil_op.ops[1]
                     if hasattr(src_operand, "constant"):
