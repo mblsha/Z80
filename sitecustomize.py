@@ -1,5 +1,11 @@
 # sitecustomize.py
 # Runs automatically at Python startup (imported by 'site')
+#
+# TEMPORARY WORKAROUND: This file patches binja-test-mocks at runtime to fix
+# architecture registration issues. Once PR #8 is merged and released
+# (https://github.com/mblsha/binja-test-mocks/pull/8), this file can be deleted.
+#
+# The fixes implemented here have been properly contributed upstream.
 
 
 def _patch_binja_mocks():
