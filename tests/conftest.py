@@ -24,7 +24,8 @@ from binja_test_mocks import binja_api  # noqa: F401
 def setup_plugin_registration():
     """Register the Z80 plugin for all tests."""
     # Clear any existing registrations for test isolation
-    Architecture.clear_registry()
+    if hasattr(Architecture, 'clear_registry'):
+        Architecture.clear_registry()
 
     # Import and register the Z80 plugin
     # This will run the registration code in __init__.py
@@ -53,6 +54,8 @@ def z80_arch():
 @pytest.fixture
 def clear_arch_registry():
     """Clear architecture registry for test isolation."""
-    Architecture.clear_registry()
+    if hasattr(Architecture, 'clear_registry'):
+        Architecture.clear_registry()
     yield
-    Architecture.clear_registry()
+    if hasattr(Architecture, 'clear_registry'):
+        Architecture.clear_registry()
