@@ -145,7 +145,7 @@ select = [
     "UP",  # pyupgrade
     "SIM", # flake8-simplify
 ]
-ignore = [
+extend-ignore = [
     "E501",  # line too long (handled by black)
     "B008",  # do not perform function calls in argument defaults
     "C901",  # too complex
@@ -158,9 +158,13 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["B011", "F401"]  # allow assert False and unused imports in tests
-"__init__.py" = ["F401"]  # allow unused imports in __init__ files
-"ColecoView.py" = ["W191", "E701", "SIM102", "SIM103", "E713", "UP031"]  # legacy code with tabs
-"Z80IL.py" = ["F405", "F403"]  # star imports from z80dis
+"**/tests/*" = ["B011", "F401"]  # allow assert False and unused imports in tests (glob pattern)
+"**/__init__.py" = ["F401"]  # allow unused imports in __init__ files (glob pattern)
+"**/ColecoView.py" = ["W191", "E701", "SIM102", "SIM103", "E713", "UP031", "F601"]  # legacy code with formatting issues
+"**/RelView.py" = ["F401", "UP031", "W293", "W291", "E713"]  # unused imports and formatting
+"**/SharpPCG850View.py" = ["F401", "F403", "F405", "UP035", "F541"]  # star imports and typing issues
+"**/Z80Arch.py" = ["F401", "F403", "F405"]  # star imports from z80dis
+"**/Z80IL.py" = ["F405", "F403"]  # star imports from z80dis
 
 [tool.black]
 target-version = ["py310", "py311", "py312"]

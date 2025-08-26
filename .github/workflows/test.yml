@@ -38,10 +38,15 @@ jobs:
       run: |
         uv sync --dev
 
-    - name: Lint with ruff
+    - name: Debug Ruff config and version
       run: |
-        uv run ruff check . --output-format=github
-        uv run ruff format . --check
+        uvx --from ruff==0.6.4 ruff --version
+        uvx --from ruff==0.6.4 ruff check --config ./pyproject.toml --show-settings | head -20
+        
+    - name: Lint with ruff (pinned version, explicit config)
+      run: |
+        uvx --from ruff==0.6.4 ruff check --config ./pyproject.toml . --output-format=github
+        uvx --from ruff==0.6.4 ruff format --config ./pyproject.toml . --check
 
     - name: Type check with mypy
       run: |
