@@ -29,7 +29,7 @@ classifiers = [
 
 dependencies = [
     "z80dis>=1.0.4",
-    "binja-test-mocks>=0.1.3",  # TODO: Update to >=0.1.4 once PR #8 is merged
+    "binja-test-mocks>=0.1.4",  # Architecture registry fixes included
 ]
 
 # Dev dependencies are now in [tool.uv] section
