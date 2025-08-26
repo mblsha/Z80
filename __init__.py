@@ -14,16 +14,16 @@ if os.environ.get("FORCE_BINJA_MOCK") == "1":
 import binaryninja
 
 try:
-    from .Z80Arch import Z80
     from .ColecoView import ColecoView
-    from .SharpPCG850View import SharpPCG850View, Z80PCG850Arch
     from .RelView import RelView
+    from .SharpPCG850View import SharpPCG850View, Z80PCG850Arch
+    from .Z80Arch import Z80
 except ImportError:
     # Test context - use absolute imports
-    from Z80Arch import Z80
-    from ColecoView import ColecoView  
-    from SharpPCG850View import SharpPCG850View, Z80PCG850Arch
+    from ColecoView import ColecoView
     from RelView import RelView
+    from SharpPCG850View import SharpPCG850View, Z80PCG850Arch
+    from Z80Arch import Z80
 
 # Register all components
 Z80.register()
