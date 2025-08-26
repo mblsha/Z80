@@ -2,9 +2,9 @@ name: Test Z80 Plugin
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [ main, master, develop, opcode_bundle_2-master ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main, master, opcode_bundle_2-master ]
   workflow_dispatch:
 
 env:
