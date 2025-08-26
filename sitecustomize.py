@@ -1,6 +1,7 @@
 # sitecustomize.py
 # Runs automatically at Python startup (imported by 'site')
 
+
 def _patch_binja_mocks():
     try:
         # The mock exposes the API here; 'binaryninja' re-exports from this.
@@ -81,10 +82,13 @@ def _patch_binja_mocks():
     # 2) MockLowLevelILFunction.flag_condition: add a stub if missing
     try:
         from binja_test_mocks.mock_llil import MockLowLevelILFunction
+
         if not hasattr(MockLowLevelILFunction, "flag_condition"):
+
             def flag_condition(self, *args, **kwargs):
                 # Minimal stub so tests can proceed; tailor as needed
                 return None
+
             MockLowLevelILFunction.flag_condition = flag_condition
     except Exception:
         pass
