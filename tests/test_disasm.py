@@ -77,15 +77,15 @@ def test_z80_disassembly():
 
             distxt = disasm_binja(data, addr)
 
-            assert is_disasm_equal(
-                distxt, expected
-            ), f"Line {line_num}: Expected '{expected}', got '{distxt}' for bytes {data.hex()}"
+            assert is_disasm_equal(distxt, expected), (
+                f"Line {line_num}: Expected '{expected}', got '{distxt}' for bytes {data.hex()}"
+            )
 
 
 def test_specific_instructions():
     """Test specific Z80 instructions."""
     import os
-    
+
     # Test NOP
     assert disasm_binja(b"\x00\x00\x00\x00", 0) == "NOP"
 

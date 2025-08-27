@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+
 from binaryninja.architecture import Architecture
 from binaryninja.enums import (
     BranchType,
