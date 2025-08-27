@@ -41,7 +41,7 @@ class Z80(Architecture):
     default_int_size = 1
     instr_alignment = 1
     max_instr_length = 4
-    
+
     # Valid second bytes after DD (IX) or FD (IY) prefixes
     # These are opcodes where the prefix actually changes semantics
     VALID_IX_IY_SECOND_BYTES = {
@@ -55,7 +55,6 @@ class Z80(Architecture):
         0x2A,  # LD IX/IY,(nn)
         0x2B,  # DEC IX/IY
         0x39,  # ADD IX/IY,SP
-        
         # 8-bit ops touching H/L or (HL)
         0x24,  # INC IXH/IYH
         0x25,  # DEC IXH/IYH
@@ -63,39 +62,80 @@ class Z80(Architecture):
         0x2C,  # INC IXL/IYL
         0x2D,  # DEC IXL/IYL
         0x2E,  # LD IXL/IYL,n
-        
         # (HL) memory forms -> (IX/IY+d)
         0x34,  # INC (IX/IY+d)
         0x35,  # DEC (IX/IY+d)
         0x36,  # LD (IX/IY+d),n
-        0x46, 0x4E, 0x56, 0x5E, 0x66, 0x6E,  # LD r,(IX/IY+d)
-        0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x77,  # LD (IX/IY+d),r
+        0x46,
+        0x4E,
+        0x56,
+        0x5E,
+        0x66,
+        0x6E,  # LD r,(IX/IY+d)
+        0x70,
+        0x71,
+        0x72,
+        0x73,
+        0x74,
+        0x75,
+        0x77,  # LD (IX/IY+d),r
         0x7E,  # LD A,(IX/IY+d)
-        
         # LD r,H/L and LD H/L,r where H/L becomes IXH/IXL or IYH/IYL
-        0x44, 0x45, 0x4C, 0x4D,  # LD B/C/D/E,H/L
-        0x54, 0x55, 0x5C, 0x5D,  # LD D/E,H/L
-        0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x67,  # LD H,r
-        0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6F,  # LD L,r
-        0x7C, 0x7D,  # LD A,H/L
-        
+        0x44,
+        0x45,
+        0x4C,
+        0x4D,  # LD B/C/D/E,H/L
+        0x54,
+        0x55,
+        0x5C,
+        0x5D,  # LD D/E,H/L
+        0x60,
+        0x61,
+        0x62,
+        0x63,
+        0x64,
+        0x65,
+        0x67,  # LD H,r
+        0x68,
+        0x69,
+        0x6A,
+        0x6B,
+        0x6C,
+        0x6D,
+        0x6F,  # LD L,r
+        0x7C,
+        0x7D,  # LD A,H/L
         # 8-bit ALU with H/L/(HL)
-        0x84, 0x85, 0x86,  # ADD A,H/L/(HL)
-        0x8C, 0x8D, 0x8E,  # ADC A,H/L/(HL)
-        0x94, 0x95, 0x96,  # SUB H/L/(HL)
-        0x9C, 0x9D, 0x9E,  # SBC A,H/L/(HL)
-        0xA4, 0xA5, 0xA6,  # AND H/L/(HL)
-        0xAC, 0xAD, 0xAE,  # XOR H/L/(HL)
-        0xB4, 0xB5, 0xB6,  # OR H/L/(HL)
-        0xBC, 0xBD, 0xBE,  # CP H/L/(HL)
-        
+        0x84,
+        0x85,
+        0x86,  # ADD A,H/L/(HL)
+        0x8C,
+        0x8D,
+        0x8E,  # ADC A,H/L/(HL)
+        0x94,
+        0x95,
+        0x96,  # SUB H/L/(HL)
+        0x9C,
+        0x9D,
+        0x9E,  # SBC A,H/L/(HL)
+        0xA4,
+        0xA5,
+        0xA6,  # AND H/L/(HL)
+        0xAC,
+        0xAD,
+        0xAE,  # XOR H/L/(HL)
+        0xB4,
+        0xB5,
+        0xB6,  # OR H/L/(HL)
+        0xBC,
+        0xBD,
+        0xBE,  # CP H/L/(HL)
         # Control/stack HL-class
         0xE1,  # POP IX/IY
         0xE3,  # EX (SP),IX/IY
         0xE5,  # PUSH IX/IY
         0xE9,  # JP (IX/IY)
         0xF9,  # LD SP,IX/IY
-        
         # Indexed bit/rotate/test block
         0xCB,  # DD/FD CB d opcode forms
     }
@@ -346,23 +386,29 @@ class Z80(Architecture):
     #        FloatingPointToken         Floating point number
     def _emit_defb_two_bytes(self, b0: int, b1: int):
         """Emit DEFB $xx,$yy format for compatibility with reference test corpus."""
-        return ([
-            InstructionTextToken(InstructionTextTokenType.InstructionToken, "DEFB "),
-            InstructionTextToken(InstructionTextTokenType.TextToken, f"${b0:02X},${b1:02X}"),
-        ], 2)
-    
+        return (
+            [
+                InstructionTextToken(InstructionTextTokenType.InstructionToken, "DEFB "),
+                InstructionTextToken(InstructionTextTokenType.TextToken, f"${b0:02X},${b1:02X}"),
+            ],
+            2,
+        )
+
     def _emit_defb_single_byte(self, byte_val: int):
         """Emit DEFB $xx format for single byte."""
-        return ([
-            InstructionTextToken(InstructionTextTokenType.InstructionToken, "DEFB "),
-            InstructionTextToken(InstructionTextTokenType.TextToken, f"${byte_val:02X}"),
-        ], 1)
+        return (
+            [
+                InstructionTextToken(InstructionTextTokenType.InstructionToken, "DEFB "),
+                InstructionTextToken(InstructionTextTokenType.TextToken, f"${byte_val:02X}"),
+            ],
+            1,
+        )
 
     def _format_address(self, addr_val: int) -> str:
         """Format address value with compatibility for reference test corpus."""
         if addr_val < 0:
             addr_val = addr_val & 0xFFFF
-        
+
         if os.environ.get("FORCE_BINJA_MOCK") == "1":
             # Reference expects $xxxx format (4 digits)
             return f"${addr_val:04X}"
@@ -402,38 +448,51 @@ class Z80(Architecture):
                 if next_byte not in self.VALID_IX_IY_SECOND_BYTES:
                     # Invalid IX/IY combination - treat prefix as raw data
                     return self._emit_defb_single_byte(data[0])
-            
+
             # Relative jump DEFB pattern
             # The reference treats relative jumps with large negative displacements (0x80-0xFD) as DEFB
             # Pattern applies to: DJNZ (0x10), JR (0x18), and conditional JR (0x20, 0x28, 0x30, 0x38)
-            if (len(data) >= 2 and data[0] in [0x10, 0x18, 0x20, 0x28, 0x30, 0x38] and 
-                0x80 <= data[1] <= 0xFD):
+            if (
+                len(data) >= 2
+                and data[0] in [0x10, 0x18, 0x20, 0x28, 0x30, 0x38]
+                and 0x80 <= data[1] <= 0xFD
+            ):
                 return self._emit_defb_two_bytes(data[0], data[1])
 
         # Special case for I/O instructions - use 2-digit port format instead of 4-digit
-        if (os.environ.get("FORCE_BINJA_MOCK") == "1" and len(data) >= 2):
+        if os.environ.get("FORCE_BINJA_MOCK") == "1" and len(data) >= 2:
             # OUT ($xx),A
             if data[0] == 0xD3:
                 port = data[1]
-                return ([
-                    InstructionTextToken(InstructionTextTokenType.InstructionToken, "OUT "),
-                    InstructionTextToken(InstructionTextTokenType.BeginMemoryOperandToken, "("),
-                    InstructionTextToken(InstructionTextTokenType.PossibleAddressToken, f"${port:02X}", port),
-                    InstructionTextToken(InstructionTextTokenType.EndMemoryOperandToken, ")"),
-                    InstructionTextToken(InstructionTextTokenType.OperandSeparatorToken, ","),
-                    InstructionTextToken(InstructionTextTokenType.RegisterToken, "A"),
-                ], 2)
+                return (
+                    [
+                        InstructionTextToken(InstructionTextTokenType.InstructionToken, "OUT "),
+                        InstructionTextToken(InstructionTextTokenType.BeginMemoryOperandToken, "("),
+                        InstructionTextToken(
+                            InstructionTextTokenType.PossibleAddressToken, f"${port:02X}", port
+                        ),
+                        InstructionTextToken(InstructionTextTokenType.EndMemoryOperandToken, ")"),
+                        InstructionTextToken(InstructionTextTokenType.OperandSeparatorToken, ","),
+                        InstructionTextToken(InstructionTextTokenType.RegisterToken, "A"),
+                    ],
+                    2,
+                )
             # IN A,($xx)
             elif data[0] == 0xDB:
                 port = data[1]
-                return ([
-                    InstructionTextToken(InstructionTextTokenType.InstructionToken, "IN "),
-                    InstructionTextToken(InstructionTextTokenType.RegisterToken, "A"),
-                    InstructionTextToken(InstructionTextTokenType.OperandSeparatorToken, ","),
-                    InstructionTextToken(InstructionTextTokenType.BeginMemoryOperandToken, "("),
-                    InstructionTextToken(InstructionTextTokenType.PossibleAddressToken, f"${port:02X}", port),
-                    InstructionTextToken(InstructionTextTokenType.EndMemoryOperandToken, ")"),
-                ], 2)
+                return (
+                    [
+                        InstructionTextToken(InstructionTextTokenType.InstructionToken, "IN "),
+                        InstructionTextToken(InstructionTextTokenType.RegisterToken, "A"),
+                        InstructionTextToken(InstructionTextTokenType.OperandSeparatorToken, ","),
+                        InstructionTextToken(InstructionTextTokenType.BeginMemoryOperandToken, "("),
+                        InstructionTextToken(
+                            InstructionTextTokenType.PossibleAddressToken, f"${port:02X}", port
+                        ),
+                        InstructionTextToken(InstructionTextTokenType.EndMemoryOperandToken, ")"),
+                    ],
+                    2,
+                )
 
         decoded = decode(data, addr)
         if decoded.status != DECODE_STATUS.OK or decoded.len == 0:
@@ -508,7 +567,9 @@ class Z80(Architecture):
                     # In compatibility mode, show explicit zero displacement
                     if os.environ.get("FORCE_BINJA_MOCK") == "1":
                         result.append(InstructionTextToken(InstructionTextTokenType.TextToken, "+"))
-                        result.append(InstructionTextToken(InstructionTextTokenType.TextToken, "$00"))
+                        result.append(
+                            InstructionTextToken(InstructionTextTokenType.TextToken, "$00")
+                        )
                     # else: omit displacement of 0
                 elif oper_val >= 16:
                     # (iy+0x28)
