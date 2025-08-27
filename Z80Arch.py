@@ -301,10 +301,10 @@ class Z80(Architecture):
             r = op & 0x07
 
             # Allow only documented (HL) target; everything else is DEFB of all four bytes
-            is_documented_target = (r == 0b110)
+            is_documented_target = r == 0b110
 
             # Optional: if corpus rejects SLL entirely, disallow group 0x30–0x37
-            is_sll_group = (0x30 <= op <= 0x37)
+            is_sll_group = 0x30 <= op <= 0x37
 
             if not is_documented_target or is_sll_group:
                 info = InstructionInfo()
@@ -467,9 +467,9 @@ class Z80(Architecture):
         return (
             [
                 InstructionTextToken(InstructionTextTokenType.InstructionToken, "DEFB "),
-                InstructionTextToken(InstructionTextTokenType.TextToken, txt)
+                InstructionTextToken(InstructionTextTokenType.TextToken, txt),
             ],
-            len(bs)
+            len(bs),
         )
 
     def get_instruction_text(self, data, addr):
@@ -478,17 +478,17 @@ class Z80(Architecture):
         if COMPAT and len(data) >= 2 and data[0] in (0xDD, 0xFD) and data[1] == 0xCB:
             # If not enough bytes to form the 4-byte pattern, emit whatever we have (lossless)
             if len(data) < 4:
-                return self._emit_defb_bytes(data[:len(data)])
+                return self._emit_defb_bytes(data[: len(data)])
 
             # disp = data[2]  # Displacement byte (unused in current validation)
             op = data[3]
             r = op & 0x07
 
             # Allow only documented (HL) target; everything else is DEFB of all four bytes
-            is_documented_target = (r == 0b110)
+            is_documented_target = r == 0b110
 
             # Optional: if corpus rejects SLL entirely, disallow group 0x30–0x37
-            is_sll_group = (0x30 <= op <= 0x37)
+            is_sll_group = 0x30 <= op <= 0x37
 
             if not is_documented_target or is_sll_group:
                 return self._emit_defb_bytes(data[:4])
