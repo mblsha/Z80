@@ -295,17 +295,17 @@ class Z80(Architecture):
                 info = InstructionInfo()
                 info.length = len(data)
                 return info
-            
-            disp = data[2]
+
+            # disp = data[2]  # Displacement byte (unused in current validation)
             op = data[3]
             r = op & 0x07
-            
+
             # Allow only documented (HL) target; everything else is DEFB of all four bytes
             is_documented_target = (r == 0b110)
-            
+
             # Optional: if corpus rejects SLL entirely, disallow group 0x30–0x37
             is_sll_group = (0x30 <= op <= 0x37)
-            
+
             if not is_documented_target or is_sll_group:
                 info = InstructionInfo()
                 info.length = 4
@@ -479,17 +479,17 @@ class Z80(Architecture):
             # If not enough bytes to form the 4-byte pattern, emit whatever we have (lossless)
             if len(data) < 4:
                 return self._emit_defb_bytes(data[:len(data)])
-            
-            disp = data[2]
+
+            # disp = data[2]  # Displacement byte (unused in current validation)
             op = data[3]
             r = op & 0x07
-            
+
             # Allow only documented (HL) target; everything else is DEFB of all four bytes
             is_documented_target = (r == 0b110)
-            
+
             # Optional: if corpus rejects SLL entirely, disallow group 0x30–0x37
             is_sll_group = (0x30 <= op <= 0x37)
-            
+
             if not is_documented_target or is_sll_group:
                 return self._emit_defb_bytes(data[:4])
             # else: fall through to normal decoder for documented form
