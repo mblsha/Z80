@@ -503,17 +503,36 @@ class Z80(Architecture):
             2,
         )
 
+    # Documented ED opcodes (strict whitelist; excludes undocumented duplicates like 0x4C)
+    ED_DOC_OPS = {
+        # I/O via (C)
+        0x40, 0x41, 0x48, 0x49, 0x50, 0x51, 0x58, 0x59,
+        0x60, 0x61, 0x68, 0x69, 0x70, 0x71, 0x78, 0x79,
+
+        # 16-bit arithmetic
+        0x42, 0x4A, 0x52, 0x5A, 0x62, 0x6A, 0x72, 0x7A,  # SBC/ADC HL,ss
+
+        # 16-bit memory transfers (nn)
+        0x43, 0x4B, 0x53, 0x5B, 0x63, 0x6B, 0x73, 0x7B,  # LD (nn),ss / LD ss,(nn)
+
+        # Specials
+        0x44,       # NEG          (strict: only 0x44, NO 0x4C/0x54/... aliases)
+        0x45,       # RETN
+        0x4D,       # RETI
+        0x46, 0x56, 0x5E,  # IM 0, IM 1, IM 2 (strict: no undocumented mirrors)
+        0x47, 0x4F, 0x57, 0x5F,  # LD I,A / LD R,A / LD A,I / LD A,R
+        0x67, 0x6F,  # RRD, RLD
+
+        # Block transfer/search (and repeated I/O)
+        0xA0, 0xA1, 0xA2, 0xA3,  # LDI, CPI, INI, OUTI
+        0xA8, 0xA9, 0xAA, 0xAB,  # LDD, CPD, IND, OUTD
+        0xB0, 0xB1, 0xB2, 0xB3,  # LDIR, CPIR, INIR, OTIR
+        0xB8, 0xB9, 0xBA, 0xBB,  # LDDR, CPDR, INDR, OTDR
+    }
+
     def _is_valid_ed_second_byte(self, b):
-        """Check if ED + second_byte forms a valid Z80 instruction."""
-        # Documented ranges
-        if 0x40 <= b <= 0x7F:
-            return True
-        if 0xA0 <= b <= 0xBB:
-            return True
-        # Additional known valid ED opcodes outside main ranges
-        if b in (0x44, 0x45, 0x4D, 0x47, 0x4F, 0x57, 0x5F):
-            return True
-        return False
+        """Check if ED + second_byte forms a STRICTLY documented Z80 instruction."""
+        return b in self.ED_DOC_OPS
 
     def get_instruction_text(self, data, addr):
         # DD/FD CB compatibility gate for lossless disassembly (highest priority)
