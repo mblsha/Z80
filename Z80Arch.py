@@ -313,7 +313,12 @@ class Z80(Architecture):
             # else: fall through to normal decoder for documented form
 
         # Mirror the ED prefix compatibility gate so length matches the DEFB we emit
-        if COMPAT and len(data) >= 2 and data[0] == 0xED and not self._is_valid_ed_second_byte(data[1]):
+        if (
+            COMPAT
+            and len(data) >= 2
+            and data[0] == 0xED
+            and not self._is_valid_ed_second_byte(data[1])
+        ):
             info = InstructionInfo()
             info.length = 2
             return info
@@ -497,7 +502,9 @@ class Z80(Architecture):
         return (
             [
                 InstructionTextToken(InstructionTextTokenType.InstructionToken, "DEFB "),
-                InstructionTextToken(InstructionTextTokenType.TextToken, f"${byte1:02X},${byte2:02X}"),
+                InstructionTextToken(
+                    InstructionTextTokenType.TextToken, f"${byte1:02X},${byte2:02X}"
+                ),
             ],
             2,
         )
@@ -506,25 +513,80 @@ class Z80(Architecture):
     # ED opcodes that should be decoded (not DEFB) - extracted from test corpus
     ED_DOC_OPS = {
         # I/O via (C)
-        0x40, 0x41, 0x48, 0x49, 0x50, 0x51, 0x58, 0x59,
-        0x60, 0x61, 0x68, 0x69, 0x78, 0x79,
+        0x40,
+        0x41,
+        0x48,
+        0x49,
+        0x50,
+        0x51,
+        0x58,
+        0x59,
+        0x60,
+        0x61,
+        0x68,
+        0x69,
+        0x78,
+        0x79,
         # 16-bit arithmetic
-        0x42, 0x4A, 0x52, 0x5A, 0x62, 0x6A, 0x72, 0x7A,
+        0x42,
+        0x4A,
+        0x52,
+        0x5A,
+        0x62,
+        0x6A,
+        0x72,
+        0x7A,
         # 16-bit memory transfers
-        0x43, 0x4B, 0x53, 0x5B, 0x73, 0x7B,
+        0x43,
+        0x4B,
+        0x53,
+        0x5B,
+        0x73,
+        0x7B,
         # Special instructions
-        0x44, 0x45, 0x46, 0x47, 0x4D, 0x4F, 0x56, 0x57, 0x5E, 0x5F, 0x67, 0x6F,
+        0x44,
+        0x45,
+        0x46,
+        0x47,
+        0x4D,
+        0x4F,
+        0x56,
+        0x57,
+        0x5E,
+        0x5F,
+        0x67,
+        0x6F,
         # Block operations
-        0xA0, 0xA1, 0xA2, 0xA3, 0xA8, 0xA9, 0xAA, 0xAB,
-        0xB0, 0xB1, 0xB2, 0xB3, 0xB8, 0xB9, 0xBA, 0xBB,
+        0xA0,
+        0xA1,
+        0xA2,
+        0xA3,
+        0xA8,
+        0xA9,
+        0xAA,
+        0xAB,
+        0xB0,
+        0xB1,
+        0xB2,
+        0xB3,
+        0xB8,
+        0xB9,
+        0xBA,
+        0xBB,
     }
 
     # ED opcodes that would consume 16-bit immediate operands (length-aware DEFB)
     ED_WOULD_USE_NN = {
         # Memory transfer instructions that take (nn) operands - only valid ones from corpus
-        0x43, 0x4B, 0x53, 0x5B, 0x73, 0x7B,  # LD (nn),ss / LD ss,(nn)
+        0x43,
+        0x4B,
+        0x53,
+        0x5B,
+        0x73,
+        0x7B,  # LD (nn),ss / LD ss,(nn)
         # Include invalid ones that would conceptually use nn for 4-byte DEFB
-        0x63, 0x6B,  # Invalid but would use nn if they were valid
+        0x63,
+        0x6B,  # Invalid but would use nn if they were valid
     }
 
     def _is_valid_ed_second_byte(self, b):
