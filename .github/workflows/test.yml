@@ -86,22 +86,20 @@ jobs:
     - name: Install uv
       uses: astral-sh/setup-uv@v4
 
-    - name: Set up Python
+    - name: Set up Python (for runtime; uvx handles tools)
       run: |
         uv python install 3.11
         uv python pin 3.11
+        python --version
 
-    - name: Install build tools
+    - name: Build sdist and wheel
       run: |
-        uv pip install build twine
+        # Use uvx for ephemeral build tools - no venv needed
+        uvx --from build pyproject-build --sdist --wheel --outdir dist
 
-    - name: Build distribution
+    - name: Verify artifacts with Twine
       run: |
-        uv build
-
-    - name: Check distribution
-      run: |
-        uv run twine check dist/*
+        uvx --from twine twine check dist/*
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
