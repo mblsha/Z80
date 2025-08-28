@@ -621,7 +621,12 @@ class Z80(Architecture):
                 txt = "IX" if oper_type == OPER_TYPE.MEM_DISPL_IX else "IY"
                 result.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, txt))
 
-                if oper_val == 0:
+                # JP (IX/IY) special case: no displacement exists, print "(IX)" or "(IY)"
+                # Guard on the actual instruction and its decoded length
+                if decoded.op == OP.JP and decoded.len == 2 and oper_val == 0:
+                    # Do not append "+$00" for JP (IX) or JP (IY)
+                    pass  # Skip displacement formatting
+                elif oper_val == 0:
                     # In compatibility mode, show explicit zero displacement
                     if os.environ.get("FORCE_BINJA_MOCK") == "1":
                         result.append(InstructionTextToken(InstructionTextTokenType.TextToken, "+"))
