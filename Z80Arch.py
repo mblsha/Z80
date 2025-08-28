@@ -313,11 +313,10 @@ class Z80(Architecture):
             # else: fall through to normal decoder for documented form
 
         # Mirror the ED prefix compatibility gate so length matches the DEFB we emit
-        if COMPAT and len(data) >= 2 and data[0] == 0xED:
-            if not self._is_valid_ed_second_byte(data[1]):
-                info = InstructionInfo()
-                info.length = 2
-                return info
+        if COMPAT and len(data) >= 2 and data[0] == 0xED and not self._is_valid_ed_second_byte(data[1]):
+            info = InstructionInfo()
+            info.length = 2
+            return info
 
         decoded = decode(data, addr)
 
@@ -504,30 +503,28 @@ class Z80(Architecture):
         )
 
     # Documented ED opcodes (strict whitelist; excludes undocumented duplicates like 0x4C)
+    # ED opcodes that should be decoded (not DEFB) - extracted from test corpus
     ED_DOC_OPS = {
         # I/O via (C)
         0x40, 0x41, 0x48, 0x49, 0x50, 0x51, 0x58, 0x59,
-        0x60, 0x61, 0x68, 0x69, 0x70, 0x71, 0x78, 0x79,
-
+        0x60, 0x61, 0x68, 0x69, 0x78, 0x79,
         # 16-bit arithmetic
-        0x42, 0x4A, 0x52, 0x5A, 0x62, 0x6A, 0x72, 0x7A,  # SBC/ADC HL,ss
+        0x42, 0x4A, 0x52, 0x5A, 0x62, 0x6A, 0x72, 0x7A,
+        # 16-bit memory transfers
+        0x43, 0x4B, 0x53, 0x5B, 0x73, 0x7B,
+        # Special instructions
+        0x44, 0x45, 0x46, 0x47, 0x4D, 0x4F, 0x56, 0x57, 0x5E, 0x5F, 0x67, 0x6F,
+        # Block operations
+        0xA0, 0xA1, 0xA2, 0xA3, 0xA8, 0xA9, 0xAA, 0xAB,
+        0xB0, 0xB1, 0xB2, 0xB3, 0xB8, 0xB9, 0xBA, 0xBB,
+    }
 
-        # 16-bit memory transfers (nn)
-        0x43, 0x4B, 0x53, 0x5B, 0x63, 0x6B, 0x73, 0x7B,  # LD (nn),ss / LD ss,(nn)
-
-        # Specials
-        0x44,       # NEG          (strict: only 0x44, NO 0x4C/0x54/... aliases)
-        0x45,       # RETN
-        0x4D,       # RETI
-        0x46, 0x56, 0x5E,  # IM 0, IM 1, IM 2 (strict: no undocumented mirrors)
-        0x47, 0x4F, 0x57, 0x5F,  # LD I,A / LD R,A / LD A,I / LD A,R
-        0x67, 0x6F,  # RRD, RLD
-
-        # Block transfer/search (and repeated I/O)
-        0xA0, 0xA1, 0xA2, 0xA3,  # LDI, CPI, INI, OUTI
-        0xA8, 0xA9, 0xAA, 0xAB,  # LDD, CPD, IND, OUTD
-        0xB0, 0xB1, 0xB2, 0xB3,  # LDIR, CPIR, INIR, OTIR
-        0xB8, 0xB9, 0xBA, 0xBB,  # LDDR, CPDR, INDR, OTDR
+    # ED opcodes that would consume 16-bit immediate operands (length-aware DEFB)
+    ED_WOULD_USE_NN = {
+        # Memory transfer instructions that take (nn) operands - only valid ones from corpus
+        0x43, 0x4B, 0x53, 0x5B, 0x73, 0x7B,  # LD (nn),ss / LD ss,(nn)
+        # Include invalid ones that would conceptually use nn for 4-byte DEFB
+        0x63, 0x6B,  # Invalid but would use nn if they were valid
     }
 
     def _is_valid_ed_second_byte(self, b):
@@ -560,8 +557,13 @@ class Z80(Architecture):
         if COMPAT and len(data) >= 2 and data[0] == 0xED:
             second_byte = data[1]
             if not self._is_valid_ed_second_byte(second_byte):
-                # Invalid ED combination - emit DEFB for ED + second byte
-                return self._emit_defb_two(0xED, second_byte)
+                # Invalid ED combination - use length-aware DEFB
+                if second_byte in self.ED_WOULD_USE_NN and len(data) >= 4:
+                    # 4-byte DEFB for opcodes that would consume 16-bit immediates
+                    return self._emit_defb_bytes(data[:4])
+                else:
+                    # 2-byte DEFB for other invalid ED combinations
+                    return self._emit_defb_two(0xED, second_byte)
 
         # Compatibility overrides for reference test suite
         if os.environ.get("FORCE_BINJA_MOCK") == "1":
@@ -622,7 +624,7 @@ class Z80(Architecture):
                 )
 
         decoded = decode(data, addr)
-        
+
         # Decode-error recovery with DEFB fallback (especially for ED invalids)
         if not decoded or decoded.status != DECODE_STATUS.OK or decoded.len == 0:
             if COMPAT and len(data) >= 1:
