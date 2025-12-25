@@ -10,11 +10,11 @@ This directory contains tests for the Z80 Binary Ninja plugin using `binja-test-
 # Using fish shell
 fish run-tests.fish
 
-# Using pytest directly
-FORCE_BINJA_MOCK=1 pytest
+# With uv (recommended)
+uv run pytest
 
-# With coverage
-FORCE_BINJA_MOCK=1 pytest --cov
+# Using pytest directly (tests/conftest.py enables mocks automatically)
+pytest
 ```
 
 ### Setup Virtual Environment
@@ -37,13 +37,5 @@ pip install pytest pytest-cov
 
 ## Writing New Tests
 
-All test files should start with:
-
-```python
-import os
-os.environ["FORCE_BINJA_MOCK"] = "1"
-
-from binja_test_mocks import binja_api  # noqa: F401
-```
-
-This ensures the mock API is loaded before importing any Binary Ninja modules.
+Do not set `FORCE_BINJA_MOCK` or import `binja_test_mocks.binja_api` in each test file.
+`tests/conftest.py` installs the mock API once for the entire test run.

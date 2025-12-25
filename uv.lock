@@ -4,11 +4,11 @@ requires-python = ">=3.10"
 
 [[package]]
 name = "binja-test-mocks"
-version = "0.1.4"
+version = "0.1.10"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/99/30/f0fb3fe93697a88ca30ebd0cc1a82d7d35f1e83d940588d77a5cd93ec887/binja_test_mocks-0.1.4.tar.gz", hash = "sha256:bc8ca0b5dff0b82c27608d091a7742ae0113b5fd549d9c766dcc9f953775a7fd", size = 22437 }
+sdist = { url = "https://files.pythonhosted.org/packages/9d/7c/e06ce363829d2ad44fbe606a06ce4e4eb853acad4b24e4c2ab358fc5b18c/binja_test_mocks-0.1.10.tar.gz", hash = "sha256:7e2c9336db57c48dd6cb053737694f367b4baa7b9fdfa4f66c93a5f64498ad1b", size = 24845 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d3/76/5327e199eec9956b62e797abc95d3addaab7bc3104f8ee193dd5ed2a5e4f/binja_test_mocks-0.1.4-py3-none-any.whl", hash = "sha256:1130ff5ab0be8dacd81c916e03bb50b444311a5c99f8e302a95a0858aa1de2e9", size = 26793 },
+    { url = "https://files.pythonhosted.org/packages/81/e8/292b63f73a8cd3fef51d228950ee6d95485e53f44d899ee8713dda546acc/binja_test_mocks-0.1.10-py3-none-any.whl", hash = "sha256:cfb1d54723d86dca490c15fca486e0854c8e9af46b562f78278028d23a633af7", size = 28278 },
 ]
 
 [[package]]
@@ -16,12 +16,12 @@ name = "binja-z80"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "binja-test-mocks" },
     { name = "z80dis" },
 ]
 
 [package.dev-dependencies]
 dev = [
+    { name = "binja-test-mocks" },
     { name = "black" },
     { name = "isort" },
     { name = "mypy" },
@@ -33,13 +33,11 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [
-    { name = "binja-test-mocks", specifier = ">=0.1.4" },
-    { name = "z80dis", specifier = ">=1.0.4" },
-]
+requires-dist = [{ name = "z80dis", specifier = ">=1.0.4" }]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "binja-test-mocks", specifier = ">=0.1.10" },
     { name = "black", specifier = ">=23.7.0" },
     { name = "isort", specifier = ">=5.12.0" },
     { name = "mypy", specifier = ">=1.5.0" },

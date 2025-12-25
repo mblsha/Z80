@@ -1,62 +1,56 @@
 """Pytest configuration for Z80 plugin tests."""
 
+from __future__ import annotations
+
+import importlib.util
 import os
 import sys
 from pathlib import Path
 
-# Ensure FORCE_BINJA_MOCK is set before any imports
-os.environ["FORCE_BINJA_MOCK"] = "1"
-
-# Add plugin directory to Python path
-plugin_dir = Path(__file__).parent.parent
-if str(plugin_dir) not in sys.path:
-    sys.path.insert(0, str(plugin_dir))
-
-# Import mock API before anything else
 import pytest
 
-# Import Binary Ninja components after mock setup
-from binaryninja import Architecture
-from binja_test_mocks import binja_api  # noqa: F401
+
+def _running_inside_binary_ninja() -> bool:
+    try:
+        return importlib.util.find_spec("binaryninjaui") is not None
+    except (ValueError, ImportError):
+        return False
+
+
+if not _running_inside_binary_ninja():
+    os.environ.setdefault("FORCE_BINJA_MOCK", "1")
+
+    # Import mock API before importing anything from `binaryninja`.
+    from binja_test_mocks import (
+        binja_api,  # noqa: F401  # pyright: ignore
+        mock_llil,
+    )
+
+    mock_llil.set_size_lookup({1: ".b", 2: ".w"}, {"b": 1, "w": 2})
+
+
+# Make the plugin importable as a package (`import Z80`) like Binary Ninja does.
+_plugin_dir = Path(__file__).resolve().parents[1]
+_plugins_parent = _plugin_dir.parent
+if str(_plugins_parent) not in sys.path:
+    sys.path.insert(0, str(_plugins_parent))
 
 
 @pytest.fixture(scope="session", autouse=True)
-def setup_plugin_registration():
-    """Register the Z80 plugin for all tests."""
-    # sitecustomize.py already patched the mocks, so registration is now meaningful.
-    # Clear any existing registrations for test isolation
+def setup_plugin_registration() -> None:
+    """Register the Z80 plugin for all tests (using the mock Binary Ninja API)."""
+    from binaryninja import Architecture
+
     if hasattr(Architecture, "clear_registry"):
         Architecture.clear_registry()
 
-    # Import and register the Z80 plugin
-    # This will run the registration code in __init__.py
-    import __init__  # noqa: F401
+    from Z80._bn_plugin import register
 
-    # Verify that the plugin registration actually worked
-    try:
-        arch = Architecture["Z80"]
-        assert hasattr(
-            arch, "get_instruction_info"
-        ), "Z80 architecture missing get_instruction_info"
-        assert hasattr(
-            arch, "get_instruction_text"
-        ), "Z80 architecture missing get_instruction_text"
-        print(f"✅ Z80 plugin registered successfully: {type(arch).__name__}")
-    except Exception as e:
-        pytest.fail(f"Failed to register Z80 plugin: {e}")
+    register(plugin_dir=_plugin_dir)
 
 
 @pytest.fixture
 def z80_arch():
-    """Get the registered Z80 architecture instance."""
+    from binaryninja import Architecture
+
     return Architecture["Z80"]
-
-
-@pytest.fixture
-def clear_arch_registry():
-    """Clear architecture registry for test isolation."""
-    if hasattr(Architecture, "clear_registry"):
-        Architecture.clear_registry()
-    yield
-    if hasattr(Architecture, "clear_registry"):
-        Architecture.clear_registry()
