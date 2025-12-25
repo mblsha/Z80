@@ -29,15 +29,14 @@ classifiers = [
 
 dependencies = [
     "z80dis>=1.0.4",
-    "binja-test-mocks>=0.1.4",  # Architecture registry fixes included
 ]
 
 # Dev dependencies are now in [tool.uv] section
 
 [project.urls]
-"Homepage" = "https://github.com/yourusername/binja-z80"
-"Bug Tracker" = "https://github.com/yourusername/binja-z80/issues"
-"Documentation" = "https://github.com/yourusername/binja-z80/blob/main/README.md"
+"Homepage" = "https://github.com/mblsha/Z80"
+"Bug Tracker" = "https://github.com/mblsha/Z80/issues"
+"Documentation" = "https://github.com/mblsha/Z80/blob/opcode_bundle_2-master/README.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
@@ -109,6 +108,7 @@ ignore_missing_imports = false
 
 [tool.uv]
 dev-dependencies = [
+    "binja-test-mocks>=0.1.10",
     "pytest>=7.4.0",
     "pytest-cov>=4.1.0",
     "pytest-timeout>=2.1.0",

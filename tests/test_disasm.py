@@ -2,16 +2,10 @@
 """Test Z80 disassembly against expected output."""
 
 import os
-
-os.environ["FORCE_BINJA_MOCK"] = "1"
-
 import re
 from pathlib import Path
 
 from binaryninja import Architecture
-from binja_test_mocks import binja_api  # noqa: F401
-
-# Import after setting up mocks
 
 
 def disasm_binja(data, addr):
@@ -84,13 +78,11 @@ def test_z80_disassembly():
 
 def test_specific_instructions():
     """Test specific Z80 instructions."""
-    import os
-
     # Test NOP
     assert disasm_binja(b"\x00\x00\x00\x00", 0) == "NOP"
 
     # Test LD instructions - use format based on compatibility mode
-    if os.environ.get("FORCE_BINJA_MOCK") == "1":
+    if os.environ.get("FORCE_BINJA_MOCK", "").lower() in ("1", "true", "yes"):
         # Compatibility mode uses $xx format
         assert disasm_binja(b"\x3e\x42\x00\x00", 0) == "LD A,$42"
         assert disasm_binja(b"\x01\x34\x12\x00", 0) == "LD BC,$1234"

@@ -1,3 +1,0 @@
-[submodule "vendor/binja-test-mocks"]
-	path = vendor/binja-test-mocks
-	url = git@github.com:mblsha/binja-test-mocks.git

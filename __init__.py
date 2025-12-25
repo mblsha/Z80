@@ -1,51 +1,47 @@
+from __future__ import annotations
+
+import importlib.util
 import os
 import sys
 from pathlib import Path
 
-# Add plugin directory to path for imports
-plugin_dir = str(Path(__file__).resolve().parent)
-if plugin_dir not in sys.path:
-    sys.path.insert(0, plugin_dir)
+_plugin_dir = Path(__file__).resolve().parent
+_plugin_dir_str = str(_plugin_dir)
 
-# Load mock API for testing if requested
-if os.environ.get("FORCE_BINJA_MOCK") == "1":
-    from binja_test_mocks import binja_api  # noqa: F401
-
-import binaryninja
-
-try:
-    from .ColecoView import ColecoView
-    from .RelView import RelView
-    from .SharpPCG850View import SharpPCG850View, Z80PCG850Arch
-    from .Z80Arch import Z80
-except ImportError:
-    # Test context - use absolute imports
-    from ColecoView import ColecoView
-    from RelView import RelView
-    from SharpPCG850View import SharpPCG850View, Z80PCG850Arch
-    from Z80Arch import Z80
-
-# Register all components
-Z80.register()
-ColecoView.register()
-Z80PCG850Arch.register()
-SharpPCG850View.register()
-RelView.register()
-
-# built-in view
-EM_Z80 = 220
-binaryninja.BinaryViewType["ELF"].register_arch(
-    EM_Z80, binaryninja.enums.Endianness.LittleEndian, binaryninja.Architecture["Z80"]
-)
+# Ensure the plugin directory is importable when loaded directly by Binary Ninja.
+if _plugin_dir_str not in sys.path:
+    sys.path.insert(0, _plugin_dir_str)
 
 
-class ParametersInRegistersCallingConvention(binaryninja.CallingConvention):
-    name = "ParametersInRegisters"
-    # int_return_reg = 'A'
+def module_exists(module_name: str) -> bool:
+    if module_name in sys.modules:
+        return True
+    try:
+        return importlib.util.find_spec(module_name) is not None
+    except (ValueError, ImportError):
+        return False
 
 
-arch = binaryninja.Architecture["Z80"]
-arch.register_calling_convention(ParametersInRegistersCallingConvention(arch, "default"))
+def _running_inside_binary_ninja() -> bool:
+    try:
+        if module_exists("binaryninjaui"):
+            return True
+    except Exception:
+        pass
 
-arch = binaryninja.Architecture["Z80 PC-G850"]
-arch.register_calling_convention(ParametersInRegistersCallingConvention(arch, "default"))
+    exe = (sys.executable or "").lower()
+    if "binary ninja.app" in exe:
+        return True
+    return os.path.basename(exe) in ("binaryninja", "binaryninja.exe")
+
+
+_force_mock_requested = os.environ.get("FORCE_BINJA_MOCK", "").lower() in ("1", "true", "yes")
+_running_binja = _running_inside_binary_ninja()
+_skip_registration = _force_mock_requested and not _running_binja
+
+_has_binaryninja = module_exists("binaryninja")
+
+if _has_binaryninja and __package__ and not _skip_registration:
+    from ._bn_plugin import register
+
+    register(plugin_dir=_plugin_dir)
